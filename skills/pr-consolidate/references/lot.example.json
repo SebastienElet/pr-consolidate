@@ -1,0 +1,46 @@
+{
+  "note": "Illustrative plan. Discover the actual repository context and project commands before use.",
+  "lot": "example",
+  "root": "/tmp/pr-consolidate-example",
+  "branch": "integration/example",
+  "base_branch": "trunk",
+  "base_sha": "1111111111111111111111111111111111111111",
+  "remote_url": "git@code.example.org:team/project.git",
+  "source": "/tmp/pr-consolidate-example/source",
+  "push_clone": "/tmp/pr-consolidate-example/push",
+  "artifacts": "/tmp/pr-consolidate-example/artifacts",
+  "author_name": "Example Reviewer",
+  "author_email": "reviewer@example.org",
+  "commands": {
+    "prepare": [
+      {
+        "argv": ["make", "setup-isolated"],
+        "timeout_seconds": 600
+      }
+    ],
+    "build": [
+      {
+        "argv": ["make", "build"],
+        "timeout_seconds": 600
+      }
+    ],
+    "check": [
+      {
+        "argv": ["make", "check"],
+        "timeout_seconds": 900
+      }
+    ]
+  },
+  "prs": [
+    {
+      "id": 10,
+      "head": "2222222222222222222222222222222222222222",
+      "branch": "feature/one"
+    },
+    {
+      "id": 11,
+      "head": "3333333333333333333333333333333333333333",
+      "branch": "feature/two"
+    }
+  ]
+}

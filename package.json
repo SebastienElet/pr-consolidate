@@ -1,0 +1,26 @@
+{
+  "name": "@sebastienelet/pr-consolidate",
+  "version": "0.0.2",
+  "description": "Repository-aware pull request consolidation with project-native checks and individual reviews.",
+  "type": "module",
+  "packageManager": "bun@1.4.3",
+  "engines": {
+    "bun": "1.4.3"
+  },
+  "files": [
+    "skills/**/*.md",
+    "skills/**/*.json",
+    "skills/**/*.py",
+    "skills/**/*.sh",
+    "integration/",
+    "README.md",
+    "TODO.md"
+  ],
+  "scripts": {
+    "test": "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s skills/pr-consolidate/tests -p \"test_*.py\" -v"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SebastienElet/pr-consolidate.git"
+  }
+}
