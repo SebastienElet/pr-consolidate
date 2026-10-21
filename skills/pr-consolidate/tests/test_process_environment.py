@@ -69,7 +69,7 @@ class ProcessEnvironmentTests(unittest.TestCase):
             path.write_text(json.dumps(plan))
             start = time.monotonic()
             try:
-                result = subprocess.run([sys.executable, str(SCRIPTS / 'project_commands.py'),
+                result = subprocess.run([str(SCRIPTS / 'pr-consolidate'), 'project-commands',
                                          str(path), 'build', directory, str(root / 'run.log')],
                                         text=True, capture_output=True, timeout=12)
                 elapsed = time.monotonic() - start
@@ -81,6 +81,35 @@ class ProcessEnvironmentTests(unittest.TestCase):
                         os.kill(int((root / 'child.pid').read_text()), signal.SIGKILL)
                     except ProcessLookupError:
                         pass
+
+    def test_exited_parent_cannot_report_success_while_output_child_can_still_mutate_candidate(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            marker = root / 'late-change'
+            child_code = 'import time,pathlib,sys; time.sleep(2); pathlib.Path(sys.argv[1]).write_text("still ran")'
+            parent_code = 'import subprocess,sys; subprocess.Popen([sys.executable,"-c",sys.argv[1],sys.argv[2]])'
+            plan = {'commands': {'build': [{'argv': [sys.executable, '-c', parent_code,
+                child_code, str(marker)], 'timeout_seconds': 1}]}}
+            path = root / 'lot.json'
+            path.write_text(json.dumps(plan))
+            result = subprocess.run([str(SCRIPTS / 'project-commands'), str(path), 'build',
+                directory, str(root / 'run.log')], text=True, capture_output=True, timeout=5)
+            self.assertEqual(result.returncode, 124, result.stdout + result.stderr)
+            time.sleep(1.5)
+            self.assertFalse(marker.exists())
+
+    def test_exited_parent_waits_for_output_child_and_collects_its_complete_log(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            child_code = 'import time; time.sleep(0.3); print("completed child",flush=True)'
+            parent_code = 'import subprocess,sys; subprocess.Popen([sys.executable,"-c",sys.argv[1]])'
+            path = root / 'lot.json'
+            path.write_text(json.dumps({'commands': {'build': [{'argv': [sys.executable, '-c',
+                parent_code, child_code], 'timeout_seconds': 2}]}}))
+            result = subprocess.run([str(SCRIPTS / 'project-commands'), str(path), 'build',
+                directory, str(root / 'run.log')], text=True, capture_output=True, timeout=5)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertIn('completed child', (root / 'run.log').read_text())
 
 
 if __name__ == '__main__':

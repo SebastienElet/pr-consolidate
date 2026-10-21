@@ -19,7 +19,7 @@ class ProjectCommandsTests(unittest.TestCase):
                     'literal $(touch injected)'], 'timeout_seconds': 3}]}}
             plan = root / 'lot.json'
             plan.write_text(json.dumps(lot))
-            result = subprocess.run([sys.executable, str(SCRIPTS / 'project_commands.py'),
+            result = subprocess.run([str(SCRIPTS / 'pr-consolidate'), 'project-commands',
                                      str(plan), 'build', str(root / 'repo'), str(root / 'build.log')],
                                     capture_output=True, text=True)
             self.assertEqual(result.returncode, 0, result.stderr)
@@ -35,7 +35,7 @@ class ProjectCommandsTests(unittest.TestCase):
             environment = dict(os.environ)
             if token:
                 environment['NPM_TOKEN'] = token
-            result = subprocess.run([sys.executable, str(SCRIPTS / 'project_commands.py'),
+            result = subprocess.run([str(SCRIPTS / 'pr-consolidate'), 'project-commands',
                                      str(plan), phase, directory, str(log)],
                                     env=environment, capture_output=True, text=True)
             return result, log.read_text() if log.exists() else ''
@@ -74,6 +74,18 @@ class ProjectCommandsTests(unittest.TestCase):
         result, log = self.run_command(commands, token='private-fixture-secret')
         self.assertEqual(result.returncode, 2)
         self.assertNotIn('private-fixture-secret', result.stderr + log)
+
+    def test_project_command_inherits_caller_stdin(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            plan = root / 'plan.json'
+            plan.write_text(json.dumps({'commands': {'build': [{'argv': [sys.executable, '-c',
+                'import sys; value=sys.stdin.read(); print(value,end=""); sys.exit(0 if value=="supplied input\\n" else 17)'],
+                'timeout_seconds': 2}]}}))
+            result = subprocess.run([str(SCRIPTS / 'project-commands'), str(plan), 'build',
+                directory, str(root / 'run.log')], input='supplied input\n', capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertIn('supplied input', (root / 'run.log').read_text())
 
 
 if __name__ == '__main__':
