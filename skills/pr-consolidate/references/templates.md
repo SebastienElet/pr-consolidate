@@ -61,8 +61,8 @@ This comment is advisory; it grants no native approval or mechanical merge block
 ```
 
 ```sh
-python3 <installed-skill>/scripts/forge.py review-comment <source-pr> <full-source-head> <body-file> dry-run
-python3 <installed-skill>/scripts/forge.py review-comment <source-pr> <full-source-head> <body-file> apply
+<installed-skill>/scripts/forge review-comment <source-pr> <full-source-head> <body-file> dry-run
+<installed-skill>/scripts/forge review-comment <source-pr> <full-source-head> <body-file> apply
 ```
 
 `dry-run` is read-only. `apply` requires publication authority. A same-head reassessment preserves
@@ -77,6 +77,6 @@ to every source review. Merge and replacement retain their own authorization and
 
 ## Replacement plan
 
-After merge verification pass `forge.py replace` a plan with `lot_pr` and `items`, each containing
+After merge verification pass `scripts/forge replace` a plan with `lot_pr` and `items`, each containing
 `id`, the original expected `head`, and optional source-specific `extra` text. Preview first.
 The generated ancestry/replacement notice supplements the earlier source review.

@@ -162,10 +162,10 @@ class GenericGitTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             (root / 'evidence.log').write_text('candidate evidence')
-            subprocess.run(['python3', str(SCRIPTS / 'native.py'), 'manifest', directory], check=True)
-            subprocess.run(['python3', str(SCRIPTS / 'native.py'), 'verify', directory], check=True)
+            subprocess.run([str(SCRIPTS / 'pr-consolidate'), 'native', 'manifest', directory], check=True)
+            subprocess.run([str(SCRIPTS / 'pr-consolidate'), 'native', 'verify', directory], check=True)
             (root / 'evidence.log').write_text('modified evidence')
-            result = subprocess.run(['python3', str(SCRIPTS / 'native.py'), 'verify', directory],
+            result = subprocess.run([str(SCRIPTS / 'pr-consolidate'), 'native', 'verify', directory],
                                     capture_output=True, text=True)
             self.assertEqual(result.returncode, 2)
             self.assertIn('archive digest mismatch: ./evidence.log', result.stderr)

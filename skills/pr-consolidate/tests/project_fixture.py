@@ -1,4 +1,5 @@
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -7,7 +8,7 @@ SCRIPTS = Path(__file__).resolve().parents[1] / 'scripts'
 
 
 def git(where, *args, check=True):
-    result = subprocess.run(['git', *args], cwd=where, text=True, capture_output=True)
+    result = subprocess.run(['git', '-c', 'maintenance.autoDetach=false', '-c', 'gc.autoDetach=false', *args], cwd=where, text=True, capture_output=True)
     if check and result.returncode:
         raise AssertionError(result.stderr)
     return result.stdout.strip()
@@ -15,8 +16,13 @@ def git(where, *args, check=True):
 
 def fixture(directory):
     root = Path(directory).resolve()
+    home = root / 'home'
+    home.mkdir()
+    (home / '.gitconfig').write_text('[maintenance]\n autoDetach = false\n[gc]\n autoDetach = false\n')
     origin, seed = root / 'origin.git', root / 'seed'
     git(root, 'init', '--bare', '-q', '--initial-branch=trunk', str(origin))
+    git(origin, 'config', 'maintenance.autoDetach', 'false')
+    git(origin, 'config', 'gc.autoDetach', 'false')
     git(root, 'clone', '-q', str(origin), str(seed))
     git(seed, 'config', 'user.name', 'Fixture Reviewer')
     git(seed, 'config', 'user.email', 'fixture@example.invalid')
@@ -51,7 +57,8 @@ def fixture(directory):
 
 
 def run(path, operation, *args, environment=None):
-    return subprocess.run(['/bin/bash', str(SCRIPTS / f'lot-{operation}.sh'), str(path), *args],
+    environment = dict(os.environ if environment is None else environment, HOME=str(path.parent / 'home'))
+    return subprocess.run([str(SCRIPTS / f'lot-{operation}.sh'), str(path), *args],
                           text=True, capture_output=True, env=environment)
 
 

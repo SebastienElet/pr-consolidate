@@ -3,3 +3,8 @@ __pycache__/
 *.pyc
 node_modules/
 *.tgz
+
+/runtime/target/
+/skills/pr-consolidate/bin/
+
+/skills/pr-consolidate/scripts/

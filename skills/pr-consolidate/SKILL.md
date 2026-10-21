@@ -5,7 +5,7 @@ description: >
   asked to combine several PRs into one batch or mega PR. Detect the repository and its primary
   branch, review every source and the aggregate, and publish head-specific comments when
   authorized. Excludes single-PR reviews and cleanup without an agreed consolidation scope.
-compatibility: Requires Git and Python 3.11+; project tools and an authenticated forge CLI depend on the current repository.
+compatibility: Requires Git and the packaged Rust executable for macOS or Linux; project tools and an authenticated forge CLI depend on the current repository.
 metadata:
   category: dev
 ---
@@ -29,8 +29,9 @@ does not determine the merge target: detect the primary branch from the remote, 
 Required harness skills are `code-review` for source and aggregate reviews, `tdd` for owned fixes,
 and `proof-integrity-review` when verification changes. Check availability before each required
 phase; never bundle these external capabilities. This workflow does not compose `pr-verdict`.
-Use `python3 <installed-skill>/scripts/forge.py context` from the target checkout to inspect
-GitHub or Bitbucket Cloud context. Use the detected forge's supported CLI within the user's existing authorization. An inspection
+Use `<installed-skill>/scripts/forge context` from the target checkout to inspect
+GitHub or Bitbucket Cloud context. The packaged entrypoints are native executables; invoke them
+directly, including the compatibility names ending in `.sh`. Use the detected forge's supported CLI within the user's existing authorization. An inspection
 request does not authorize publication, merge or replacement; reuse authority already given.
 
 ## Workflow

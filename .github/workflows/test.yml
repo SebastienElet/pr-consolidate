@@ -22,7 +22,11 @@ jobs:
       - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6
         with:
           bun-version: 1.4.3
+      - run: rustup toolchain install 1.85.0 --profile minimal --component rustfmt --component clippy
+      - run: rustup default 1.85.0
+      - run: rustc --version
       - run: python3 --version
       - run: git --version
+      - run: bun run check
       - run: bun run test
       - run: bun pm pack --ignore-scripts --destination "$RUNNER_TEMP"

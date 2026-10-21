@@ -6,11 +6,21 @@ The canonical source is this repository. User installations consume the packaged
 not a symlink into a development checkout. Build a local review artifact with Bun:
 
 ```sh
+bun run build
 bun pm pack --ignore-scripts --destination /tmp/pr-consolidate-package
 ```
 
-Inspect and test the tarball before publication. It contains the skill, references, scripts and
-tests; it has no npm runtime dependencies or installation scripts. Local tarball installation in
+Inspect and test the tarball before publication. It contains the skill, references, native entrypoints, tests, Rust source, Cargo lockfile and
+the current host executable; it has no npm runtime dependencies or installation scripts.
+`bun run build` requires Rust 1.85+ and Cargo registry access for uncached locked dependencies.
+The Rust build utility compiles the runtime and launcher for its host, prepares all executables,
+and replaces each executable atomically. The complete installation is not a single transaction.
+It writes `skills/pr-consolidate/bin/<platform>/pr-consolidate` and the native launcher, where platform is
+`darwin-arm64`, `darwin-x64`, `linux-arm64` or `linux-x64` (glibc). Build separately on each
+platform before packaging a matching artifact, or explicitly build inside the acquired package
+when its platform executable is absent. It generates executable aliases under `skills/pr-consolidate/scripts/` for the existing command names,
+including `lot-*.sh`. These are native binaries, not shell scripts. The launcher refuses a missing
+runtime; an archive must be built for the consuming platform before its entrypoints can run. Local tarball installation in
 a temporary consumer exercises package layout without publishing or changing the active harness.
 
 For persistent dotfiles integration, the exact package version must first be available from its
@@ -64,7 +74,7 @@ Confirm that the host discovers `code-review`, `tdd` and `proof-integrity-review
 Forge access uses its authenticated native CLI; credentials remain with that CLI. `pr-verdict`
 retains its explicit invocation contract and is not composed by this workflow.
 
-The current helpers use Python and Git. Bun acquires and packages this skill; target repositories
-choose their own runtimes and checks. Database, migration and container setup remain with their
+The build utility, launchers and helpers are implemented in Rust; invocation uses native executables and Git. Python 3.11+ is used only by development
+fixtures. Bun acquires and packages this skill; target repositories choose their own runtimes and checks. Database, migration and container setup remain with their
 supported project commands. Local fixtures do not qualify a real service write or assembled
 project environment.

@@ -13,22 +13,45 @@ From the target checkout:
 $pr-consolidate Consolidate PRs <IDs> into one reviewed batch.
 ```
 
-Read [the workflow](skills/pr-consolidate/SKILL.md). The canonical source, helpers and tests live
-under `skills/pr-consolidate/`. The harness supplies `code-review`, `tdd` and
-`proof-integrity-review` for their respective phases; they remain external capabilities.
+Read [the workflow](skills/pr-consolidate/SKILL.md). Git and the native Rust executable run the
+helpers; production requires neither Python nor a shell interpreter. GitHub and Bitbucket Cloud use their authenticated
+`gh` and `bkt` CLIs. Credentials remain with those CLIs and the existing environment. Project
+runtimes, services and checks are discovered from the target repository.
 
-Git and Python 3.11+ run the local helpers. Project runtimes, database setup, migration commands
-and forge access are discovered from that repository. GitHub and Bitbucket Cloud are supported
-through their authenticated `gh` and `bkt` CLIs. Bun 1.4.3 manages this skill's distribution;
-it is not imposed on target projects.
+The harness supplies `code-review`, `tdd` and `proof-integrity-review` for their respective phases;
+they remain external capabilities.
 
-## Development and installation
+## Development
+
+Requires Rust 1.85+, Git, Bun 1.4.3 and Python 3.11+ for test fixtures only:
 
 ```sh
 bun run test
+bun run check
 ```
 
-Tests use temporary Git repositories, project commands and service substitutes. They do not
-qualify a real assembled application, remote write or unexercised host. See
-[harness integration](integration/README.md) for versioned local preview installation and later
-npm consumption. Follow-ups are tracked in [TODO.md](TODO.md).
+`test` builds the native executables, runs Rust behavioral tests and exercises the public CLI
+against temporary repositories and substitute forge CLIs. `check` runs native Rust formatting and
+Clippy. No test performs real forge writes. See [the parity map](integration/rust-parity.md) for
+retained boundaries and negative witnesses.
+
+## Build and installation
+
+```sh
+bun run build
+bun pm pack --ignore-scripts --destination /tmp/pr-consolidate-package
+```
+
+Build on macOS or Linux for the current host. The archive contains the built platform runtime and native entrypoints,
+the Rust source and locked dependencies; another platform can explicitly run `bun run build` in
+the installed package root. No installation script downloads or runs code automatically. After
+building, helpers need neither Rust, Python nor a shell interpreter. The package has no npm runtime dependencies.
+
+Use `<installed-skill>/scripts/forge` for forge operations and the existing `lot-*.sh` entrypoints
+for campaign operations. The `.sh` names are retained for compatibility but are native binaries; invoke them directly. See [harness integration](integration/README.md) for isolated consumer
+validation and Claude, Codex and Cursor projections. Publication and live harness replacement
+remain separate work in [TODO.md](TODO.md).
+
+Supported build hosts are macOS ARM64/x64 and Linux ARM64/x64 with glibc. A platform-specific build
+or fixture run does not establish another host's behavior. Fixtures do not qualify real forge
+writes, model activation or a complete campaign with assembled project services.
