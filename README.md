@@ -58,3 +58,7 @@ is listed in [TODO.md](TODO.md).
 Supported build hosts are macOS ARM64/x64 and Linux ARM64/x64 with glibc. A platform-specific build
 or fixture run does not establish another host's behavior. Fixtures do not qualify real forge
 writes, model activation or a complete campaign with assembled project services.
+
+## Credits
+
+Original idea by [hoklims (Guillaume Fossier)](https://github.com/hoklims).
