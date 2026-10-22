@@ -74,6 +74,13 @@ files and replacement of a running native image. Process coverage retains escape
 children, late candidate mutation, complete child logs and inherited stdin. An independent outer
 watchdog bounds fixture invocations; the production process collector is not its own timeout oracle.
 
+Fixture executable creation and process startup share a mutex. This coordinates their descriptor
+lifetimes under parallel tests: a Unix fork can inherit another thread's writable executable
+descriptor before close-on-exec, causing `ETXTBSY` when that file is started. The behavior is
+documented in [Rust issue 114554](https://github.com/rust-lang/rust/issues/114554). The lock is
+released after spawn, before waiting for process completion; test bodies remain parallel and no
+retry or skip is used.
+
 The Cargo feature is enabled by both the development test command and Clippy. The package includes
 the integration test and fixture sources, so an isolated acquired consumer can rebuild and run the
 same checks. Neither development commands, CI nor the acquired package execute Python. Historical

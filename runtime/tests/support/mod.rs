@@ -6,7 +6,8 @@ use std::io::Write;
 use std::os::unix::fs::PermissionsExt;
 use std::os::unix::process::CommandExt;
 use std::path::{Path, PathBuf};
-use std::process::{Command, Stdio};
+use std::process::{Child, Command, Stdio};
+use std::sync::Mutex;
 use std::time::{Duration, Instant};
 use tempfile::TempDir;
 
@@ -14,6 +15,12 @@ pub const HEAD: &str = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 pub const BATCH: &str = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
 pub const MERGE: &str = "cccccccccccccccccccccccccccccccccccccccc";
 pub const FIXTURE: &str = env!("CARGO_BIN_EXE_cli-fixture");
+static EXECUTABLE_CREATION_AND_SPAWN: Mutex<()> = Mutex::new(());
+
+pub fn spawn(command: &mut Command) -> Child {
+    let _guard = EXECUTABLE_CREATION_AND_SPAWN.lock().unwrap();
+    command.spawn().unwrap()
+}
 
 pub fn scripts() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR")).join("../skills/pr-consolidate/scripts")
@@ -49,7 +56,7 @@ pub fn observe(command: &mut Command, input: Option<&str>) -> Observed {
         Stdio::null()
     });
     command.process_group(0);
-    let mut child = command.spawn().unwrap();
+    let mut child = spawn(command);
     if let Some(input) = input {
         child
             .stdin
@@ -100,10 +107,12 @@ pub fn load(path: impl AsRef<Path>) -> Value {
     serde_json::from_slice(&fs::read(path).unwrap()).unwrap()
 }
 pub fn executable(path: impl AsRef<Path>, source: &Path) {
+    let _guard = EXECUTABLE_CREATION_AND_SPAWN.lock().unwrap();
     fs::copy(source, &path).unwrap();
     fs::set_permissions(path, fs::Permissions::from_mode(0o755)).unwrap();
 }
 pub fn hook(path: impl AsRef<Path>, body: &str) {
+    let _guard = EXECUTABLE_CREATION_AND_SPAWN.lock().unwrap();
     write(&path, body);
     fs::set_permissions(path, fs::Permissions::from_mode(0o755)).unwrap();
 }

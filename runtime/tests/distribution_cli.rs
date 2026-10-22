@@ -152,12 +152,12 @@ fn rebuild_replaces_native_image_while_previous_invocation_finishes() {
         .join(host.platform)
         .join("pr-consolidate");
     let ready = workspace.root.join("ready");
-    let mut running = Command::new(&installed)
-        .arg("wait")
-        .arg(&ready)
-        .stdin(Stdio::piped())
-        .spawn()
-        .unwrap();
+    let mut running = spawn(
+        Command::new(&installed)
+            .arg("wait")
+            .arg(&ready)
+            .stdin(Stdio::piped()),
+    );
     let deadline = std::time::Instant::now() + std::time::Duration::from_secs(3);
     while !ready.exists()
         && running.try_wait().unwrap().is_none()
