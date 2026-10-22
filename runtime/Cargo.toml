@@ -14,3 +14,12 @@ sha2 = "0.10"
 
 [dev-dependencies]
 tempfile = "3"
+
+[features]
+test-fixtures = []
+
+[[bin]]
+name = "cli-fixture"
+path = "tests/support/fixture.rs"
+required-features = ["test-fixtures"]
+test = false

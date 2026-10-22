@@ -10,7 +10,7 @@ bun run build
 bun pm pack --ignore-scripts --destination /tmp/pr-consolidate-package
 ```
 
-Inspect and test the tarball before publication. It contains the skill, references, native entrypoints, tests, Rust source, Cargo lockfile and
+Inspect and test the tarball before publication. It contains the skill, references, native entrypoints, Rust integration tests and native fixture source, Cargo lockfile and
 the current host executable; it has no npm runtime dependencies or installation scripts.
 `bun run build` requires Rust 1.85+ and Cargo registry access for uncached locked dependencies.
 The Rust build utility compiles the runtime and launcher for its host, prepares all executables,
@@ -52,7 +52,7 @@ projections. Run them from the canonical consumer checkout with its documented d
 procedure. Reject divergent existing destinations; inspect them before any explicit repair.
 
 Validate first with the native `tooling/install-agent-skills.ts` installer, a temporary consumer
-manifest and isolated destination directories. Run twice for each host and inspect each leaf link
+manifest and isolated destination directories. Run twice for each agent and inspect each leaf link
 and its resolved `SKILL.md`. This proves projection mechanics and package contents, not actual
 model activation or a successful consolidation campaign.
 
@@ -65,7 +65,12 @@ development checkout or a temporary worktree.
 
 Give this consumer its own `home/.arnes.yaml` containing the skill entry above and use the existing
 installer with that consumer root and the actual home directory for each selected agent. Inspect
-resolved leaf links after deployment. Future npm integration replaces these links deliberately;
+resolved leaf links after deployment. The native installer refuses a destination pointing to another package. Before an authorized
+replacement, record each exact link target, preserve the old consumer, and remove only those
+inspected leaf symlinks; install from the new durable consumer and read every link back. Codex
+uses `~/.agents/skills`, Claude uses `~/.claude/skills`, and Cursor uses `~/.cursor/skills`.
+Run digest and repository discovery through each real deployed link after installation.
+Future npm integration replaces these links deliberately;
 the collision check must not be bypassed. Keep the local consumer while any live link targets it.
 
 ## Dependencies and limits
@@ -74,7 +79,9 @@ Confirm that the host discovers `code-review`, `tdd` and `proof-integrity-review
 Forge access uses its authenticated native CLI; credentials remain with that CLI. `pr-verdict`
 retains its explicit invocation contract and is not composed by this workflow.
 
-The build utility, launchers and helpers are implemented in Rust; invocation uses native executables and Git. Python 3.11+ is used only by development
-fixtures. Bun acquires and packages this skill; target repositories choose their own runtimes and checks. Database, migration and container setup remain with their
+The build utility, launchers, helpers, test suites and migrated executable substitutes are implemented
+in Rust. Tests retain POSIX shell and native Git hook scenarios. The project has no executable
+dependency on Python. Bun acquires and packages this skill; target repositories choose their own
+runtimes and checks. Database, migration and container setup remain with their
 supported project commands. Local fixtures do not qualify a real service write or assembled
 project environment.

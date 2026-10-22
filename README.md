@@ -23,7 +23,7 @@ they remain external capabilities.
 
 ## Development
 
-Requires Rust 1.85+, Git, Bun 1.4.3 and Python 3.11+ for test fixtures only:
+Requires Rust 1.85+, Git and Bun 1.4.3:
 
 ```sh
 bun run test
@@ -31,7 +31,10 @@ bun run check
 ```
 
 `test` builds the native executables, runs Rust behavioral tests and exercises the public CLI
-against temporary repositories and substitute forge CLIs. `check` runs native Rust formatting and
+against temporary repositories and native Rust substitute forge CLIs. Cargo builds the fixture
+executable only with the `test-fixtures` feature, enabled by `bun run test`; Python is not
+required by development, CI or the distribution. Tests still exercise POSIX shell behavior and
+native Git hooks. `check` runs native Rust formatting and
 Clippy. No test performs real forge writes. See [the parity map](integration/rust-parity.md) for
 retained boundaries and negative witnesses.
 
@@ -49,8 +52,8 @@ building, helpers need neither Rust, Python nor a shell interpreter. The package
 
 Use `<installed-skill>/scripts/forge` for forge operations and the existing `lot-*.sh` entrypoints
 for campaign operations. The `.sh` names are retained for compatibility but are native binaries; invoke them directly. See [harness integration](integration/README.md) for isolated consumer
-validation and Claude, Codex and Cursor projections. Publication and live harness replacement
-remain separate work in [TODO.md](TODO.md).
+validation and Claude, Codex and Cursor projections. Local previews can be activated independently of npm publication. Remaining distribution work
+is listed in [TODO.md](TODO.md).
 
 Supported build hosts are macOS ARM64/x64 and Linux ARM64/x64 with glibc. A platform-specific build
 or fixture run does not establish another host's behavior. Fixtures do not qualify real forge
